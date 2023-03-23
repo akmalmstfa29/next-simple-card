@@ -2,7 +2,7 @@ import React from "react";
 import reactStringReplace from "react-string-replace";
 import styled from "styled-components";
 import { Property } from "../interfaces";
-import { USDFormat } from "../utils/helpers";
+import { hidePhoneNumber, USDFormat } from "../utils/helpers";
 import Image from 'next/image'
 
 type ListingAdCardProps = {
@@ -207,10 +207,10 @@ const ListingAdCard = ({ data }: ListingAdCardProps) => {
   const arrowRight = require("../assets/icons/chevron-right.png");
   const arrowLeft = require("../assets/icons/chevron-left.png");
   const buildingIcon = require("../assets/icons/building.png");
+  const secureDescription = reactStringReplace(hidePhoneNumber(description), "\n", () => <br />)
 
   const [showDescription, setShowDescription] = React.useState(true);
   const [showArrow, setShowArrow] = React.useState(false);
-  const [secureDescription, setSecureDescription] = React.useState<string | React.ReactNodeArray>(description);
   const [phoneNumbers, setPhoneNumbers] = React.useState([]);
 
   const toggleDescription = () => {
@@ -229,44 +229,6 @@ const ListingAdCard = ({ data }: ListingAdCardProps) => {
   React.useEffect(() => {
     setShowDescription(false);
   }, []);
-
-  React.useEffect(() => {
-    const regexp = new RegExp(
-      "\\+?\\(?\\d*\\)? ?\\(?\\d+\\)?\\d*([\\s./-]?\\d{2,})+",
-      "g"
-    );
-    const phone_numbers = [...description.matchAll(regexp)];
-
-    setPhoneNumbers(
-      phone_numbers
-        .filter((item) => item[0].length > 7)
-        .map((item) => ({
-          real: item[0],
-          secured: item[0].replace(/\d{4}$/, "XXXX"),
-          hideReal: true
-        }))
-    );
-  }, [description]);
-
-  React.useEffect(() => {
-    let newDescription: string | React.ReactNodeArray = description;
-
-    phoneNumbers.forEach((phoneNumber, key) => {
-      newDescription = reactStringReplace(
-        newDescription,
-        phoneNumber.real,
-        () => (
-          <span key={key} onClick={() => togglePhoneNumber(key)}>
-            {phoneNumbers[key]?.hideReal
-              ? phoneNumbers[key]?.secured
-              : phoneNumbers[key]?.real}
-          </span>
-        )
-      );
-    });
-    newDescription = reactStringReplace(newDescription, "\n", () => <br />);
-    newDescription && setSecureDescription(newDescription);
-  }, [phoneNumbers]);
 
   return (
     <Wrapper>
